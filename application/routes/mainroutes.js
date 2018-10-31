@@ -8,7 +8,7 @@ module.exports = function(app, express) {
     const mainRoutes = express.Router()
 
     mainRoutes.get('/', function(req, res){
-    	res.send('Hello World!')
+    	res.render('index')
     })
 
 	mainRoutes.get('/scrape', function(req, res){
