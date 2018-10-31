@@ -6,6 +6,8 @@ app.use(morgan('dev')) // log every request to the console
 
 var request = require('request')
 
+app.set('view engine', 'ejs') // set up ejs for templating
+
 app.get('/scrape', function(req, res){
 
 	console.log("gonna scrape")
