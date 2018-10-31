@@ -1,13 +1,16 @@
 var express = require('express')
 var app = express()
+
+const morgan       = require('morgan')
+app.use(morgan('dev')) // log every request to the console
+
 var request = require('request')
 
 app.get('/scrape', function(req, res){
 
 	console.log("gonna scrape")
 
-//	url = 'http://www.google.fr'
-	url = 'http://data.montpellier3m.fr/dataset/monuments-historiques-de-montpellier/resource/cd6f9af2-4ce6-4165-9ca1-022312c586c7'
+	url = 'https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0'
 
 	request(url, function(error, response, html){
 
