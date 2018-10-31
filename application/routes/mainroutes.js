@@ -13,6 +13,8 @@ module.exports = function(app, express) {
     	//get the ?url= query tagid from request
         reqURL = req.query.url
 
+        // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
+
         if(reqURL != null)
         {
         	console.log("url : " + reqURL)
