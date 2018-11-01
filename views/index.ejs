@@ -5,14 +5,21 @@
     <meta charset="utf-8">
     <title>EHPAD Harvester</title>
     <meta descr="pour récupérer des listing d'EHPAD">
-    
-    <form>
+   
+</head>
+<body>
+
+	<form>
     	URL : 
     	<input type="text" name="url"></input>
     	<input type="submit" value="GO Harvest !">
     </form>
 
-</head>
-<body>
+
+    <div id="response">
+    	<%= error%> </br>
+    	status code : <%= statuscode%>
+    </div>
+
 </body>
 </html>
