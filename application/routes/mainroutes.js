@@ -9,7 +9,7 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
-    function parsehtmlfrompersonnesageesgouvfr(error, response, html, res) 
+    function parsehtmlfrompersonnesageesgouvfr(error, response, html, process) 
     {
     	statuscode = response && response.statusCode
 		  		jsonresult.etablissements = []
@@ -70,14 +70,14 @@ module.exports = function(app, express) {
   					data = {statuscode: statuscode ,
 											error: "no error" , 
 											json: jsonresult}
-					res.render('index', data)
+					process(data)
 				}
 				else 
 				{
 					data = {statuscode: 0 , 
 											error: error ,
 											json: jsonresult}
-					res.render('index', data)
+					process(data)
 				}
     }
 
@@ -93,7 +93,7 @@ module.exports = function(app, express) {
 
         if(reqURL != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, res)} )
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, function(data) { res.render('index', data)} )} )
 
         }
        	else res.render('index', data) 
