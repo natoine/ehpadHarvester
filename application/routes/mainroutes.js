@@ -17,36 +17,35 @@ module.exports = function(app, express) {
 
         if(reqURL != null)
         {
-        	console.log("url : " + reqURL)
         	request(reqURL, function(error, response, html){
 
-		  		//console.log('body:', html);
 		  		statuscode = response && response.statusCode
-		  		console.log('statuscode: ', statuscode) // Print the response status code if a response was received
 		  		jsonresult = {}
+		  		jsonresult.etablissements = []
 
 				if(!error)
 				{
 					$ = cheerio.load(html)
 					results = $('.cnsa_results-item-inside')
 					results.map(function(nodeiterator, el){
-						etabname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
-						etabadress = $(el).children('.row').first().children('.cnsa_results-infoscol')
+						var etablissement = {}
+						etablissement.officialname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
+						etablissement.address = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
-						etabphone = $(el).children('.row').first().children('.cnsa_results-infoscol')
+						etablissement.phone = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-phone').first().text().trim()
-  						etabtype = $(el).children('.row').first().children('.cnsa_results-tags2')
+  						etablissement.typeehpad = $(el).children('.row').first().children('.cnsa_results-tags2')
   							.first().text().trim()
 
   						//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
   						etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-infos').first().children('.result-addr2')
 
-  						etabBP = ""
+  						etablissement.bp = ""
   						if(etabpostalcodecitynodes.length > 1)
   						{
   							firstnode = $(etabpostalcodecitynodes).first()
-  							etabBP = firstnode.text().trim()
+  							etablissement.bp = firstnode.text().trim()
   							etabpostalcodecity = firstnode.next().text().trim()
   						}
   						else
@@ -55,48 +54,34 @@ module.exports = function(app, express) {
   						}
 
   						etabpcctab = etabpostalcodecity.split(' ')
-  						etabpostalcode = etabpcctab[0]
-  						etabcity = ""
+  						etablissement.postalcode = etabpcctab[0]
+  						etablissement.city = ""
   						iteratorlength = etabpcctab.length
   						for(iteratoretabcity = 1; iteratoretabcity < iteratorlength ; iteratoretabcity++) 
   						{
-  							etabcity = etabcity + " " + etabpcctab[iteratoretabcity].trim()
+  							etablissement.city = etablissement.city + " " + etabpcctab[iteratoretabcity].trim()
   						} 
-  						etabcity = etabcity.trim()
+  						etablissement.city = etablissement.city.trim()
 
   						//can show single room and double room ( first is single, if exists second is double)
   						etabcoutnodes = $(el).children('.row').first().children('.cnsa_result-compare')
   							.first().children('.cnsa_result-compare-text').first().children('.clearfix')
-  						etabcoutsingle = "unknown"
-  						etabcoutdouble = "unknown"
+  						etablissement.coutsingle = "unknown"
+  						etablissement.coutdouble = "unknown"
   						if(etabcoutnodes.length > 0)
   						{
-  							etabcoutsingle = $(etabcoutnodes).first().children('.prix').first().text().trim()
-  							if(etabcoutnodes.length > 1) etabcoutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
+  							etablissement.coutsingle = $(etabcoutnodes).first().children('.prix').first().text().trim()
+  							if(etabcoutnodes.length > 1) etablissement.coutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
   						}
 
-  						
-  						console.log("etab " + nodeiterator + " : ")
-  						console.log("etab name : " + etabname )
-  						console.log("etab adress : " + etabadress  )
-  						//console.log("etab postalcodecity : " +  etabpostalcodecity )
-  						console.log("etab postalcode : " + etabpostalcode )
-  						console.log("etab city : " + etabcity )
-  						console.log("etab BP : " + etabBP )
-						console.log("etab phone : " +  etabphone )
-						console.log("etab type : " +  etabtype )
-						console.log("etab coût single : " +  etabcoutsingle )
-						console.log("etab coût double : " +  etabcoutdouble )
+  						jsonresult.etablissements.push(etablissement)
   					})
-					console.log("nbResults : " + results.length)
-
 					res.render('index', {statuscode: statuscode ,
 											error: "no error" , 
 											json: jsonresult})
 				}
 				else 
 				{
-					console.log('error: ', error)
 					res.render('index', {statuscode: 0 , 
 											error: error ,
 											json: jsonresult})
