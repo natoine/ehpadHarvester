@@ -1,6 +1,7 @@
 
 const request = require('request')
 const cheerio = require('cheerio')
+const fs = require('fs')
 
 // application/routes.js
 module.exports = function(app, express) {
@@ -79,6 +80,11 @@ module.exports = function(app, express) {
 					res.render('index', {statuscode: statuscode ,
 											error: "no error" , 
 											json: jsonresult})
+					/*const file = fs.createWriteStream('./result.file')
+					file.write(JSON.stringify(jsonresult))
+					file.end()
+					const src = fs.createReadStream('./result.file')
+  					src.pipe(res)*/
 				}
 				else 
 				{
