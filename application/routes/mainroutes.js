@@ -29,7 +29,32 @@ module.exports = function(app, express) {
 					$ = cheerio.load(html)
 					results = $('.cnsa_results-item-inside') 
 					results.map(function(i, el){
-  						console.log(i + " etab name : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )//.closest('.row').closest('div').closest('h3').text() )
+						etabname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
+						etabadress = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  							.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
+						etabphone = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  							.first().children('.cnsa_results-phone').first().text().trim()
+
+  						//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
+  						etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  							.first().children('.cnsa_results-infos').first().children('.result-addr2')
+  						etabpostalcodecity = etabpostalcodecitynodes.map(function(i, el){
+  							return $(el).text().trim()
+  						}).get().join(' ')
+
+
+  						/*etabpcctab = etabpostalcodecity.split(' ')
+  						etabpostalcode = etabpcctab[0]
+  						etabcity = 
+						*/
+  						
+  						console.log("etab " + i + " : ")
+  						console.log("etab name : " + etabname )
+  						console.log("etab adress : " + etabadress  )
+  						console.log("etab postalcode : " +  etabpostalcodecity )
+						console.log("etab phone : " +  etabphone )
+						//console.log(i + " etab type : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
+						//console.log(i + " etab coût : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
   					})
 					console.log("nbResults : " + results.length)
 
