@@ -38,20 +38,36 @@ module.exports = function(app, express) {
   						//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
   						etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-infos').first().children('.result-addr2')
-  						etabpostalcodecity = etabpostalcodecitynodes.map(function(i, el){
-  							return $(el).text().trim()
-  						}).get().join(' ')
 
+  						etabBP = ""
+  						if(etabpostalcodecitynodes.length > 1)
+  						{
+  							firstnode = $(etabpostalcodecitynodes).first()
+  							etabBP = firstnode.text().trim()
+  							etabpostalcodecity = firstnode.next().text().trim()
+  						}
+  						else
+  						{
+  							etabpostalcodecity = $(etabpostalcodecitynodes).first().text().trim()
+  						}
 
-  						/*etabpcctab = etabpostalcodecity.split(' ')
+  						etabpcctab = etabpostalcodecity.split(' ')
   						etabpostalcode = etabpcctab[0]
-  						etabcity = 
-						*/
+  						etabcity = ""
+  						iteratorlength = etabpcctab.length
+  						for(i = 1; i < iteratorlength ; i++) 
+  						{
+  							etabcity = etabcity + " " + etabpcctab[i].trim()
+  						} 
+  						etabcity = etabcity.trim()
   						
   						console.log("etab " + i + " : ")
   						console.log("etab name : " + etabname )
   						console.log("etab adress : " + etabadress  )
-  						console.log("etab postalcode : " +  etabpostalcodecity )
+  						console.log("etab postalcodecity : " +  etabpostalcodecity )
+  						console.log("etab postalcode : " + etabpostalcode )
+  						console.log("etab city : " + etabcity )
+  						console.log("etab BP : " + etabBP )
 						console.log("etab phone : " +  etabphone )
 						//console.log(i + " etab type : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
 						//console.log(i + " etab coût : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
