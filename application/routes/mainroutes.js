@@ -9,19 +9,9 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
-    mainRoutes.get('/json', function(req, res){
-
-    	//get the ?url= query tagid from request
-        reqURL = req.query.url
-        jsonresult = {}
-        
-        // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
-
-        if(reqURL != null)
-        {
-        	request(reqURL, function(error, response, html){
-
-		  		statuscode = response && response.statusCode
+    function parsehtmlfrompersonnesageesgouvfr(error, response, html, res) 
+    {
+    	statuscode = response && response.statusCode
 		  		jsonresult.etablissements = []
 
 				if(!error)
@@ -77,30 +67,36 @@ module.exports = function(app, express) {
 
   						jsonresult.etablissements.push(etablissement)
   					})
-					res.render('index', {statuscode: statuscode ,
+  					data = {statuscode: statuscode ,
 											error: "no error" , 
-											json: jsonresult})
-					/*const file = fs.createWriteStream('./result.file')
-					file.write(JSON.stringify(jsonresult))
-					file.end()
-					const src = fs.createReadStream('./result.file')
-  					src.pipe(res)*/
+											json: jsonresult}
+					res.render('index', data)
 				}
 				else 
 				{
-					res.render('index', {statuscode: 0 , 
+					data = {statuscode: 0 , 
 											error: error ,
-											json: jsonresult})
+											json: jsonresult}
+					res.render('index', data)
 				}
-			})
+    }
+
+    mainRoutes.get('/json', function(req, res){
+
+    	//get the ?url= query tagid from request
+        reqURL = req.query.url
+        jsonresult = {}
+        data = {statuscode: 0 ,
+        			error: "no url specified" ,
+        			json: jsonresult}
+        // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
+
+        if(reqURL != null)
+        {
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, res)} )
 
         }
-        else
-        {
-        	res.render('index', {statuscode: 0 ,
-        							error: "no url specified" ,
-        							json: jsonresult})
-        } 
+       	else res.render('index', data) 
     })
 
 	// apply the routes to our application
