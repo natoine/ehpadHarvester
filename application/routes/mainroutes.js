@@ -28,7 +28,7 @@ module.exports = function(app, express) {
 				{
 					$ = cheerio.load(html)
 					results = $('.cnsa_results-item-inside') 
-					results.map(function(i, el){
+					results.map(function(nodeiterator, el){
 						etabname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
 						etabadress = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
@@ -57,22 +57,35 @@ module.exports = function(app, express) {
   						etabpostalcode = etabpcctab[0]
   						etabcity = ""
   						iteratorlength = etabpcctab.length
-  						for(i = 1; i < iteratorlength ; i++) 
+  						for(iteratoretabcity = 1; iteratoretabcity < iteratorlength ; iteratoretabcity++) 
   						{
-  							etabcity = etabcity + " " + etabpcctab[i].trim()
+  							etabcity = etabcity + " " + etabpcctab[iteratoretabcity].trim()
   						} 
   						etabcity = etabcity.trim()
+
+  						//can show single room and double room ( first is single, if exists second is double)
+  						etabcoutnodes = $(el).children('.row').first().children('.cnsa_result-compare')
+  							.first().children('.cnsa_result-compare-text').first().children('.clearfix')
+  						etabcoutsingle = "unknown"
+  						etabcoutdouble = "unknown"
+  						if(etabcoutnodes.length > 0)
+  						{
+  							etabcoutsingle = $(etabcoutnodes).first().children('.prix').first().text().trim()
+  							if(etabcoutnodes.length > 1) etabcoutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
+  						}
+
   						
-  						console.log("etab " + i + " : ")
+  						console.log("etab " + nodeiterator + " : ")
   						console.log("etab name : " + etabname )
   						console.log("etab adress : " + etabadress  )
-  						console.log("etab postalcodecity : " +  etabpostalcodecity )
+  						//console.log("etab postalcodecity : " +  etabpostalcodecity )
   						console.log("etab postalcode : " + etabpostalcode )
   						console.log("etab city : " + etabcity )
   						console.log("etab BP : " + etabBP )
 						console.log("etab phone : " +  etabphone )
 						console.log("etab type : " +  etabtype )
-						//console.log(i + " etab coût : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
+						console.log("etab coût single : " +  etabcoutsingle )
+						console.log("etab coût double : " +  etabcoutdouble )
   					})
 					console.log("nbResults : " + results.length)
 
