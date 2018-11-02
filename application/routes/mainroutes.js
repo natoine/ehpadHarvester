@@ -34,6 +34,8 @@ module.exports = function(app, express) {
   							.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
 						etabphone = $(el).children('.row').first().children('.cnsa_results-infoscol')
   							.first().children('.cnsa_results-phone').first().text().trim()
+  						etabtype = $(el).children('.row').first().children('.cnsa_results-tags2')
+  							.first().text().trim()
 
   						//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
   						etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
@@ -69,7 +71,7 @@ module.exports = function(app, express) {
   						console.log("etab city : " + etabcity )
   						console.log("etab BP : " + etabBP )
 						console.log("etab phone : " +  etabphone )
-						//console.log(i + " etab type : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
+						console.log("etab type : " +  etabtype )
 						//console.log(i + " etab coût : " +  $(el).children('.row').first().children('div').first().children('h3').first().text() )
   					})
 					console.log("nbResults : " + results.length)
