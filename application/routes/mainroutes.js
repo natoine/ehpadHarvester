@@ -23,11 +23,12 @@ module.exports = function(app, express) {
 		  		//console.log('body:', html);
 		  		statuscode = response && response.statusCode
 		  		console.log('statuscode: ', statuscode) // Print the response status code if a response was received
+		  		jsonresult = {}
 
 				if(!error)
 				{
 					$ = cheerio.load(html)
-					results = $('.cnsa_results-item-inside') 
+					results = $('.cnsa_results-item-inside')
 					results.map(function(nodeiterator, el){
 						etabname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
 						etabadress = $(el).children('.row').first().children('.cnsa_results-infoscol')
@@ -90,13 +91,15 @@ module.exports = function(app, express) {
 					console.log("nbResults : " + results.length)
 
 					res.render('index', {statuscode: statuscode ,
-											error: "no error"})
+											error: "no error" , 
+											json: jsonresult})
 				}
 				else 
 				{
 					console.log('error: ', error)
 					res.render('index', {statuscode: 0 , 
-											error: error})
+											error: error ,
+											json: jsonresult})
 				}
 			})
 
@@ -104,7 +107,8 @@ module.exports = function(app, express) {
         else
         {
         	res.render('index', {statuscode: 0 ,
-        							error: "no url specified"})
+        							error: "no url specified" ,
+        							json: jsonresult})
         } 
     })
 
