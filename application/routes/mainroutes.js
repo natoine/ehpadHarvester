@@ -1,5 +1,6 @@
 
 const request = require('request')
+const cheerio = require('cheerio')
 
 // application/routes.js
 module.exports = function(app, express) {
@@ -25,6 +26,8 @@ module.exports = function(app, express) {
 
 				if(!error)
 				{
+					$ = cheerio.load(html)
+					console.log($)
 					res.render('index', {statuscode: statuscode ,
 											error: "no error"})
 				}
