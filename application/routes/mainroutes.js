@@ -9,11 +9,12 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
-    mainRoutes.get('/', function(req, res){
+    mainRoutes.get('/json', function(req, res){
 
     	//get the ?url= query tagid from request
         reqURL = req.query.url
-
+        jsonresult = {}
+        
         // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
 
         if(reqURL != null)
@@ -21,7 +22,6 @@ module.exports = function(app, express) {
         	request(reqURL, function(error, response, html){
 
 		  		statuscode = response && response.statusCode
-		  		jsonresult = {}
 		  		jsonresult.etablissements = []
 
 				if(!error)
