@@ -2,6 +2,7 @@
 const request = require('request')
 const cheerio = require('cheerio')
 const fs = require('fs')
+const Json2csvparser = require('json2csv').Parser
 
 // application/routes.js
 module.exports = function(app, express) {
@@ -81,6 +82,41 @@ module.exports = function(app, express) {
 				}
     }
 
+    mainRoutes.get('/', function(req, res) {
+    	jsonresult = {}
+        data = {statuscode: 0 ,
+        			error: "no url specified" ,
+        			json: jsonresult}
+    	res.render('index', data)
+    })
+
+    mainRoutes.get('/csv', function(req, res){
+
+    	//get the ?url= query tagid from request
+        reqURL = req.query.url
+        jsonresult = {}
+        data = {statuscode: 0 ,
+        			error: "no url specified" ,
+        			json: jsonresult}
+        // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
+
+        if(reqURL != null)
+        {
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, function(data) {
+        		fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
+        		
+        		json2csvParser = new Json2csvparser({ fields })
+        		csv = json2csvParser.parse(data.json.etablissements, function(err){ res.redirect('/')})
+
+        		res.setHeader('Content-disposition', 'attachment; filename=ehpad.csv')
+    			res.set('Content-Type', 'text/csv')
+    			res.status(200).send(csv)
+        		
+        	})} )
+        }
+       	else res.redirect('/')
+    })
+
     mainRoutes.get('/json', function(req, res){
 
     	//get the ?url= query tagid from request
@@ -94,7 +130,6 @@ module.exports = function(app, express) {
         if(reqURL != null)
         {
         	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, function(data) { res.render('index', data)} )} )
-
         }
        	else res.render('index', data) 
     })
