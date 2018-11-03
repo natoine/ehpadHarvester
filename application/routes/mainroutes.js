@@ -10,7 +10,7 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
-    function parsehtmlfrompersonnesageesgouvfr(error, response, html, process) 
+    function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, process) 
     {
     	statuscode = response && response.statusCode
 		  		jsonresult.etablissements = []
@@ -68,23 +68,26 @@ module.exports = function(app, express) {
 
   						jsonresult.etablissements.push(etablissement)
   					})
-  					data = {statuscode: statuscode ,
-											error: "no error" , 
-											json: jsonresult}
+  					data = {url : url,
+  								statuscode: statuscode ,
+								error: "no error" , 
+								json: jsonresult}
 					process(data)
 				}
 				else 
 				{
-					data = {statuscode: 0 , 
-											error: error ,
-											json: jsonresult}
+					data = { url : "",
+								statuscode: 0 , 
+								error: error ,
+								json: jsonresult}
 					process(data)
 				}
     }
 
     mainRoutes.get('/', function(req, res) {
     	jsonresult = {}
-        data = {statuscode: 0 ,
+        data = {url : "",
+        			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
     	res.render('index', data)
@@ -95,26 +98,28 @@ module.exports = function(app, express) {
     	//get the ?url= query tagid from request
         reqURL = req.query.url
         jsonresult = {}
-        data = {statuscode: 0 ,
+        data = {url : reqURL,
+        			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
         // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
 
         if(reqURL != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, function(data) {
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) {
         		fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
         		
         		json2csvParser = new Json2csvparser({ fields })
-        		csv = json2csvParser.parse(data.json.etablissements, function(err){ res.redirect('/')})
-
-        		res.setHeader('Content-disposition', 'attachment; filename=ehpad.csv')
-    			res.set('Content-Type', 'text/csv')
-    			res.status(200).send(csv)
-        		
+        		if(data.json.etablissements.length > 0 )
+        		{
+        			csv = json2csvParser.parse(data.json.etablissements, function(err){ res.redirect('/')})
+	        		res.setHeader('Content-disposition', 'attachment; filename=ehpad.csv')
+    				res.set('Content-Type', 'text/csv')
+    				res.status(200).send(csv)
+        		}
         	})} )
         }
-       	else res.redirect('/')
+       	else res.render('index', data)
     })
 
     mainRoutes.get('/json', function(req, res){
@@ -122,14 +127,15 @@ module.exports = function(app, express) {
     	//get the ?url= query tagid from request
         reqURL = req.query.url
         jsonresult = {}
-        data = {statuscode: 0 ,
+        data = {url : reqURL,
+        			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
         // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
 
         if(reqURL != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, function(data) { res.render('index', data)} )} )
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) { res.render('index', data)} )} )
         }
        	else res.render('index', data) 
     })
