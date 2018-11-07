@@ -19,6 +19,8 @@
 
     <div id="response">
     	<%= data.error%> </br>
+        nb pages à moissoner : <%= data.nbpages %> </br>
+        nb ehpad : <%=data.json.etablissements.length%> </br>
     	status code : <%= data.statuscode%> </br>
         data : <%= JSON.stringify(data.json)%>
     </div>

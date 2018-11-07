@@ -66,6 +66,7 @@ module.exports = function(app, express) {
 
     function recursiveparsehtmlfrompersonnesageesgouvfr(cptpages, data, maxcptpages, process)
     {
+    	console.log("recursiveparsehtmlfrompersonnesageesgouvfr cptpages : " + cptpages)
     	if(cptpages > maxcptpages)
     	{
     		process(data)
@@ -79,8 +80,8 @@ module.exports = function(app, express) {
     			{
     				if(!error)
     				{
-    					//TODO
     					data.etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
+    					recursiveparsehtmlfrompersonnesageesgouvfr(cptpages + 1, data, maxcptpages, process)
     				}
     				else
     				{
@@ -107,18 +108,27 @@ module.exports = function(app, express) {
 
   			data = {
   					url : url,
+  					nbpages : maxcptpages ,
   					statuscode: statuscode ,
 					error: "no error" , 
 					json: jsonresult
 				}
 			
-			//recursiv call for other pages
-			recursiveparsehtmlfrompersonnesageesgouvfr(1, data, maxcptpages, process)
+			if(maxcptpages)
+			{
+				//recursiv call for other pages
+				recursiveparsehtmlfrompersonnesageesgouvfr(1, data, maxcptpages, process)
+			}
+			else
+			{
+				process(data)
+			}
 		}
 		else 
 		{
 			data = {
 					url : "",
+					nbpages : 0 ,
 					statuscode: 0 , 
 					error: error ,
 					json: jsonresult
@@ -130,6 +140,7 @@ module.exports = function(app, express) {
     mainRoutes.get('/', function(req, res) {
     	jsonresult = {}
         data = {url : "",
+        			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
@@ -142,6 +153,7 @@ module.exports = function(app, express) {
         reqURL = req.query.url
         jsonresult = {}
         data = {url : reqURL,
+        			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
@@ -171,6 +183,7 @@ module.exports = function(app, express) {
         reqURL = req.query.url
         jsonresult = {}
         data = {url : reqURL,
+        			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
         			json: jsonresult}
@@ -178,7 +191,9 @@ module.exports = function(app, express) {
 
         if(reqURL != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) { res.render('index', data)} )} )
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) { 
+        		res.render('index', data)} 
+        		)} )
         }
        	else res.render('index', data) 
     })
