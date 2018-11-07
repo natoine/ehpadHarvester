@@ -10,81 +10,121 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
+    function parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
+    {
+    	$ = cheerio.load(html)
+    	results = $('.cnsa_results-item-inside')
+
+    	results.map(function(nodeiterator, el)
+    	{
+			var etablissement = {}
+			etablissement.officialname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
+			etablissement.address = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  				.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
+			etablissement.phone = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  				.first().children('.cnsa_results-phone').first().text().trim()
+  			etablissement.typeehpad = $(el).children('.row').first().children('.cnsa_results-tags2').first().text().trim()
+
+  			//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
+  			etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
+  				.first().children('.cnsa_results-infos').first().children('.result-addr2')
+
+  			etablissement.bp = ""
+  			if(etabpostalcodecitynodes.length > 1)
+  			{
+  				firstnode = $(etabpostalcodecitynodes).first()
+  				etablissement.bp = firstnode.text().trim()
+  				etabpostalcodecity = firstnode.next().text().trim()
+  			}
+  			else	etabpostalcodecity = $(etabpostalcodecitynodes).first().text().trim()
+
+  			etabpcctab = etabpostalcodecity.split(' ')
+  			etablissement.postalcode = etabpcctab[0]
+  			etablissement.city = ""
+  			iteratorlength = etabpcctab.length
+  			for(iteratoretabcity = 1; iteratoretabcity < iteratorlength ; iteratoretabcity++) 
+  			{
+  				etablissement.city = etablissement.city + " " + etabpcctab[iteratoretabcity].trim()
+  			} 
+  			etablissement.city = etablissement.city.trim()
+
+  			//can show single room and double room ( first is single, if exists second is double)
+  			etabcoutnodes = $(el).children('.row').first().children('.cnsa_result-compare')
+  				.first().children('.cnsa_result-compare-text').first().children('.clearfix')
+  			etablissement.coutsingle = "unknown"
+  			etablissement.coutdouble = "unknown"
+  			if(etabcoutnodes.length > 0)
+  			{
+  				etablissement.coutsingle = $(etabcoutnodes).first().children('.prix').first().text().trim()
+  				if(etabcoutnodes.length > 1) etablissement.coutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
+  			}
+
+  			jsonresult.etablissements.push(etablissement)
+  		})
+  		return etablissements
+    }
+
+    function recursiveparsehtmlfrompersonnesageesgouvfr(cptpages, data, maxcptpages, process)
+    {
+    	if(cptpages > maxcptpages)
+    	{
+    		process(data)
+    	}
+    	else
+    	{
+    		//construct new url
+    		url = data.url + "?page=" + cptpages
+    		console.log("recursiv call new url : " + url)
+    		request( url, function(error, response, html)
+    			{
+    				if(!error)
+    				{
+    					//TODO
+    					data.etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
+    				}
+    				else
+    				{
+    					console.log("recursiv call cptpages : " + error)
+   						process(data)
+    				}
+    			})
+    	}
+    }
+
     function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, process) 
     {
     	statuscode = response && response.statusCode
-		  		jsonresult.etablissements = []
+		jsonresult.etablissements = []
+		etablissements = jsonresult.etablissements
 
-				if(!error)
-				{
-					$ = cheerio.load(html)
-					nbpage = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]
-					
-					results = $('.cnsa_results-item-inside')
-					console.log("nbpage : " + nbpage)
-					results.map(function(nodeiterator, el){
-						var etablissement = {}
-						etablissement.officialname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
-						etablissement.address = $(el).children('.row').first().children('.cnsa_results-infoscol')
-  							.first().children('.cnsa_results-infos').first().children('.result-addr1').first().text().trim()
-						etablissement.phone = $(el).children('.row').first().children('.cnsa_results-infoscol')
-  							.first().children('.cnsa_results-phone').first().text().trim()
-  						etablissement.typeehpad = $(el).children('.row').first().children('.cnsa_results-tags2')
-  							.first().text().trim()
+		if(!error)
+		{
+			$ = cheerio.load(html)
+			maxcptpages = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]
+			
+			//parse the first page
+			etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
 
-  						//can be multiple .result-addr2 ( if more than one, the first is BP, the second is postal + city)
-  						etabpostalcodecitynodes = $(el).children('.row').first().children('.cnsa_results-infoscol')
-  							.first().children('.cnsa_results-infos').first().children('.result-addr2')
-
-  						etablissement.bp = ""
-  						if(etabpostalcodecitynodes.length > 1)
-  						{
-  							firstnode = $(etabpostalcodecitynodes).first()
-  							etablissement.bp = firstnode.text().trim()
-  							etabpostalcodecity = firstnode.next().text().trim()
-  						}
-  						else
-  						{
-  							etabpostalcodecity = $(etabpostalcodecitynodes).first().text().trim()
-  						}
-
-  						etabpcctab = etabpostalcodecity.split(' ')
-  						etablissement.postalcode = etabpcctab[0]
-  						etablissement.city = ""
-  						iteratorlength = etabpcctab.length
-  						for(iteratoretabcity = 1; iteratoretabcity < iteratorlength ; iteratoretabcity++) 
-  						{
-  							etablissement.city = etablissement.city + " " + etabpcctab[iteratoretabcity].trim()
-  						} 
-  						etablissement.city = etablissement.city.trim()
-
-  						//can show single room and double room ( first is single, if exists second is double)
-  						etabcoutnodes = $(el).children('.row').first().children('.cnsa_result-compare')
-  							.first().children('.cnsa_result-compare-text').first().children('.clearfix')
-  						etablissement.coutsingle = "unknown"
-  						etablissement.coutdouble = "unknown"
-  						if(etabcoutnodes.length > 0)
-  						{
-  							etablissement.coutsingle = $(etabcoutnodes).first().children('.prix').first().text().trim()
-  							if(etabcoutnodes.length > 1) etablissement.coutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
-  						}
-
-  						jsonresult.etablissements.push(etablissement)
-  					})
-  					data = {url : url,
-  								statuscode: statuscode ,
-								error: "no error" , 
-								json: jsonresult}
-					process(data)
+  			data = {
+  					url : url,
+  					statuscode: statuscode ,
+					error: "no error" , 
+					json: jsonresult
 				}
-				else 
-				{
-					data = { url : "",
-								statuscode: 0 , 
-								error: error ,
-								json: jsonresult}
-					process(data)
+			
+			//recursiv call for other pages
+			recursiveparsehtmlfrompersonnesageesgouvfr(1, data, maxcptpages, process)
+		}
+		else 
+		{
+			data = {
+					url : "",
+					statuscode: 0 , 
+					error: error ,
+					json: jsonresult
 				}
+			process(data)
+		}
     }
 
     mainRoutes.get('/', function(req, res) {
