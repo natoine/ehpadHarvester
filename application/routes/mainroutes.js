@@ -59,7 +59,7 @@ module.exports = function(app, express) {
   				if(etabcoutnodes.length > 1) etablissement.coutdouble = $(etabcoutnodes).first().next().children('.prix').first().text().trim()
   			}
 
-  			jsonresult.etablissements.push(etablissement)
+  			etablissements.push(etablissement)
   		})
   		return etablissements
     }
@@ -80,7 +80,7 @@ module.exports = function(app, express) {
     			{
     				if(!error)
     				{
-    					data.etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
+    					etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
     					recursiveparsehtmlfrompersonnesageesgouvfr(cptpages + 1, data, maxcptpages, process)
     				}
     				else
@@ -95,7 +95,8 @@ module.exports = function(app, express) {
     function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, process) 
     {
     	statuscode = response && response.statusCode
-		jsonresult.etablissements = []
+    	jsonresult = {}
+    	jsonresult.etablissements = []
 		etablissements = jsonresult.etablissements
 
 		if(!error)
@@ -146,6 +147,7 @@ module.exports = function(app, express) {
 
     mainRoutes.get('/', function(req, res) {
     	jsonresult = {}
+    	jsonresult.etablissements = []
         data = {url : "",
         			nbpages : 0 ,
         			statuscode: 0 ,
@@ -159,6 +161,7 @@ module.exports = function(app, express) {
     	//get the ?url= query tagid from request
         reqURL = req.query.url
         jsonresult = {}
+        jsonresult.etablissements = []
         data = {url : reqURL,
         			nbpages : 0 ,
         			statuscode: 0 ,
@@ -189,6 +192,7 @@ module.exports = function(app, express) {
     	//get the ?url= query tagid from request
         reqURL = req.query.url
         jsonresult = {}
+        jsonresult.etablissements = []
         data = {url : reqURL,
         			nbpages : 0 ,
         			statuscode: 0 ,
