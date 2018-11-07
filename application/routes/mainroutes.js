@@ -66,7 +66,7 @@ module.exports = function(app, express) {
 
     function recursiveparsehtmlfrompersonnesageesgouvfr(cptpages, data, maxcptpages, process)
     {
-    	console.log("recursiveparsehtmlfrompersonnesageesgouvfr cptpages : " + cptpages)
+    	//console.log("recursiveparsehtmlfrompersonnesageesgouvfr cptpages : " + cptpages)
     	if(cptpages > maxcptpages)
     	{
     		process(data)
@@ -75,7 +75,7 @@ module.exports = function(app, express) {
     	{
     		//construct new url
     		url = data.url + "?page=" + cptpages
-    		console.log("recursiv call new url : " + url)
+    		//console.log("recursiv call new url : " + url)
     		request( url, function(error, response, html)
     			{
     				if(!error)
