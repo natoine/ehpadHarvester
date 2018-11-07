@@ -101,7 +101,14 @@ module.exports = function(app, express) {
 		if(!error)
 		{
 			$ = cheerio.load(html)
-			maxcptpages = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]
+			maxcptpages = 0
+			try{
+				maxcptpages = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]	
+			}
+			catch(error)
+			{
+				console.log("parsehtmlfrompersonnesageesgouvfr try maxcptpages error : " + error)
+			}
 			
 			//parse the first page
 			etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
