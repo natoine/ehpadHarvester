@@ -18,7 +18,10 @@ module.exports = function(app, express) {
 				if(!error)
 				{
 					$ = cheerio.load(html)
+					nbpage = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]
+					
 					results = $('.cnsa_results-item-inside')
+					console.log("nbpage : " + nbpage)
 					results.map(function(nodeiterator, el){
 						var etablissement = {}
 						etablissement.officialname = $(el).children('.row').first().children('div').first().children('h3').first().text().trim()
