@@ -92,63 +92,67 @@ module.exports = function(app, express) {
     	}
     }
 
-    function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, process) 
+    function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, postal, process) 
     {
     	statuscode = response && response.statusCode
     	jsonresult = {}
     	jsonresult.etablissements = []
-		etablissements = jsonresult.etablissements
+  		etablissements = jsonresult.etablissements
 
-		if(!error)
-		{
-			$ = cheerio.load(html)
-			maxcptpages = 0
-			try{
-				maxcptpages = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]	
-			}
-			catch(error)
-			{
-				console.log("parsehtmlfrompersonnesageesgouvfr try maxcptpages error : " + error)
-			}
+  		if(!error)
+  		{
+  			$ = cheerio.load(html)
+  			maxcptpages = 0
+  			try{
+  				maxcptpages = $('#cnsa_results-pager').children('div').first().children('ul').first().children('.last').first().children('a').first().attr('href').split('?page=')[1]	
+  			}
+  			catch(error)
+  			{
+  				console.log("parsehtmlfrompersonnesageesgouvfr try maxcptpages error : " + error)
+  			}
 			
 			//parse the first page
 			etablissements = parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
 
   			data = {
-  					url : url,
-  					nbpages : maxcptpages ,
-  					statuscode: statuscode ,
+          postal: postal,
+  				url : url,
+  				nbpages : maxcptpages ,
+  				statuscode: statuscode ,
 					error: "no error" , 
 					json: jsonresult
 				}
 			
-			if(maxcptpages)
-			{
-				//recursiv call for other pages
-				recursiveparsehtmlfrompersonnesageesgouvfr(1, data, maxcptpages, process)
-			}
-			else
-			{
-				process(data)
-			}
-		}
-		else 
-		{
-			data = {
-					url : "",
-					nbpages : 0 ,
-					statuscode: 0 , 
-					error: error ,
-					json: jsonresult
-				}
-			process(data)
-		}
+  			if(maxcptpages)
+  			{
+  				//recursiv call for other pages
+  				recursiveparsehtmlfrompersonnesageesgouvfr(1, data, maxcptpages, process)
+  			}
+  			else
+  			{
+  				process(data)
+  			}
+		  }
+  		else 
+  		{
+  			data = {
+  					postal: postal,
+            url : "",
+  					nbpages : 0 ,
+  					statuscode: 0 , 
+  					error: error ,
+  					json: jsonresult
+  				}
+  			process(data)
+  		}
     }
 
     mainRoutes.get('/', function(req, res) {
     	jsonresult = {}
     	jsonresult.etablissements = []
-        data = {url : "",
+        data = {
+              postal: "",
+              url : "",
         			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
@@ -158,11 +162,13 @@ module.exports = function(app, express) {
 
     mainRoutes.get('/csv', function(req, res){
 
-    	//get the ?url= query tagid from request
-        reqURL = req.query.url
+      	postal = req.query.postal
+        reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/0`
         jsonresult = {}
         jsonresult.etablissements = []
-        data = {url : reqURL,
+        data = {
+              postal: postal,
+              url : reqURL,
         			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
@@ -171,7 +177,7 @@ module.exports = function(app, express) {
 
         if(reqURL != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) {
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) {
         		fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
         		
         		json2csvParser = new Json2csvparser({ fields })
@@ -179,8 +185,8 @@ module.exports = function(app, express) {
         		{
         			csv = json2csvParser.parse(data.json.etablissements, function(err){ res.redirect('/')})
 	        		res.setHeader('Content-disposition', 'attachment; filename=ehpad.csv')
-    				res.set('Content-Type', 'text/csv')
-    				res.status(200).send(csv)
+       				res.set('Content-Type', 'text/csv')
+      				res.status(200).send(csv)
         		}
         	})} )
         }
@@ -191,11 +197,12 @@ module.exports = function(app, express) {
 
         postal = req.query.postal
     	  reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/0`
-        console.log(reqURL)
         jsonresult = {}
         jsonresult.etablissements = []
 
-        data = {url : reqURL,
+        data = {
+              postal : postal,
+              url : reqURL,
         			nbpages : 0 ,
         			statuscode: 0 ,
         			error: "no url specified" ,
@@ -204,7 +211,7 @@ module.exports = function(app, express) {
 
         if(postal != null)
         {
-        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) { 
+        	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
         		res.render('index', data)} 
         		)} )
         }
