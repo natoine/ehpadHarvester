@@ -189,10 +189,12 @@ module.exports = function(app, express) {
 
     mainRoutes.get('/json', function(req, res){
 
-    	//get the ?url= query tagid from request
-        reqURL = req.query.url
+        postal = req.query.postal
+    	  reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/0`
+        console.log(reqURL)
         jsonresult = {}
         jsonresult.etablissements = []
+
         data = {url : reqURL,
         			nbpages : 0 ,
         			statuscode: 0 ,
@@ -200,7 +202,7 @@ module.exports = function(app, express) {
         			json: jsonresult}
         // https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/13/0
 
-        if(reqURL != null)
+        if(postal != null)
         {
         	request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, function(data) { 
         		res.render('index', data)} 
