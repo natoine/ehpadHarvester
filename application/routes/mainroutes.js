@@ -10,6 +10,9 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const mainRoutes = express.Router()
 
+
+//USEFUL FUNCTIONS 
+
     function parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
     {
     	$ = cheerio.load(html)
@@ -92,7 +95,7 @@ module.exports = function(app, express) {
     	}
     }
 
-    function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, postal, process) 
+    function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, postal, km, process) 
     {
     	statuscode = response && response.statusCode
     	jsonresult = {}
@@ -117,6 +120,7 @@ module.exports = function(app, express) {
   			data = {
           postal: postal,
   				url : url,
+          km : km,
   				nbpages : maxcptpages ,
   				statuscode: statuscode ,
 					error: "no error" , 
@@ -138,6 +142,7 @@ module.exports = function(app, express) {
   			data = {
   					postal: postal,
             url : "",
+            km : km,
   					nbpages : 0 ,
   					statuscode: 0 , 
   					error: error ,
@@ -147,44 +152,18 @@ module.exports = function(app, express) {
   		}
     }
 
-    mainRoutes.get('/', function(req, res) {
-    	jsonresult = {}
-    	jsonresult.etablissements = []
-        data = {
-              postal: "",
-              url : "",
-        			nbpages : 0 ,
-        			statuscode: 0 ,
-        			error: "no url specified" ,
-        			json: jsonresult}
-    	res.render('index', data)
-    })
-
-    mainRoutes.get('/:codepostal/:km', function(req, res){
-      postal = req.params.codepostal
-      km = req.params.km
-      reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/${km}`
-      jsonresult = {}
-      jsonresult.etablissements = []
-
-      data = {
-              postal : postal,
-              url : reqURL,
-              nbpages : 0 ,
-              statuscode: 0 ,
-              error: "no url specified" ,
-              json: jsonresult
-            }
-      if(postal != null)
-      {
-          res.format({
+    function contentnegotiation(res, reqURL, postal, km)
+    {
+      res.format({
               'application/json': function(){
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
+                console.log("asked some json")
+                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
                   res.send(data)} 
                 )} )
               },
               'text/csv': function(){
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) {
+                console.log("asked some csv")
+                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) {
                   fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
                   
                   json2csvParser = new Json2csvparser({ fields })
@@ -198,7 +177,8 @@ module.exports = function(app, express) {
                 })} )
               },
               'text/html': function(){
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
+                console.log("asked some html")
+                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
                   res.render('index', data)} 
                 )} )
               },
@@ -206,6 +186,29 @@ module.exports = function(app, express) {
                 res.status(406).send('Not Acceptable')
               }
             })
+    }
+
+//ROUTES
+
+    mainRoutes.get('/:codepostal/:km', function(req, res){
+      postal = req.params.codepostal
+      km = req.params.km
+      reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/${km}`
+      jsonresult = {}
+      jsonresult.etablissements = []
+
+      data = {
+              postal : postal,
+              url : reqURL,
+              km : km,
+              nbpages : 0 ,
+              statuscode: 0 ,
+              error: "no url specified" ,
+              json: jsonresult
+            }
+      if(postal != null)
+      {
+          contentnegotiation(res, reqURL, postal, km)
       }
       else res.render('index', data)
     })
@@ -219,6 +222,7 @@ module.exports = function(app, express) {
       data = {
               postal : postal,
               url : reqURL,
+              km : 0 ,
               nbpages : 0 ,
               statuscode: 0 ,
               error: "no url specified" ,
@@ -227,12 +231,24 @@ module.exports = function(app, express) {
 
       if(postal != null)
         {
-          request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
-            res.render('index', data)} 
-            )} )
+          contentnegotiation(res, reqURL, postal, 0)
         }
         else res.render('index', data)
     })    
+
+    mainRoutes.get('/', function(req, res) {
+      jsonresult = {}
+      jsonresult.etablissements = []
+        data = {
+              postal: "",
+              url : "",
+              km : "",
+              nbpages : 0 ,
+              statuscode: 0 ,
+              error: "no url specified" ,
+              json: jsonresult}
+      res.render('index', data)
+    })
 
 	// apply the routes to our application
     app.use('/', mainRoutes)

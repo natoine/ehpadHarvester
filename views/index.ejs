@@ -9,22 +9,118 @@
 </head>
 <body>
 
-	<form>
     	Code Postal ou Département :
-    	<input type="text" name="postal" value="<%=data.postal%>"></input>
-    	<input type="submit" value="JSON" formaction="/json">
-        <input type="submit" value="CSV" formaction="/csv">
-    </form>
-
+    	<input type="text" id="inputpostal" name="postal" value="<%=data.postal%>"></input></br>
+    	Périmètre :
+        <input type="text" id="inputkm" name="km" value="<%=data.km%>"></input></br>
+        <button type="button" id="jsonbtn">JSON</button>
+        <button type="button" id="csvbtn">CSV</button>
+        
 
     <div id="response">
     	<%= data.error%> </br>
         URL : <%= data.url %> </br>
+        km : <%= data.km %> </br>
         nb pages à moissoner : <%= data.nbpages %> </br>
         nb ehpad : <%=data.json.etablissements.length%> </br>
     	status code : <%= data.statuscode%> </br>
-        data : <%= JSON.stringify(data.json)%>
+        data : <div id=datacontent><%= JSON.stringify(data.json)%></div>
     </div>
 
 </body>
 </html>
+
+<script>
+jsonbtn = document.getElementById("jsonbtn")
+csvbtn = document.getElementById("csvbtn")
+postalcodeelt = document.getElementById("inputpostal")
+kmelt = document.getElementById("inputkm")
+
+function fetchehpadjson(route)
+{
+    fetch(route, 
+                {
+                    method: 'GET',
+                    headers: { 'accept' : 'application/json'}
+                }
+            ).then(function(response){
+                response.json().then(function(data)
+                {
+                    document.getElementById("datacontent").innerHTML = JSON.stringify(data)
+                })
+            })
+}
+
+function fetchehpadcsv(route)
+{
+    fetch(route, 
+                {
+                    method: 'GET',
+                    headers: { 'accept' : 'text/csv'}
+                }
+            ).then(function(response){
+                response.blob().then(function(datablob)
+                {
+                    datablob.name = 'newfile.csv'
+                    anchor = document.createElement('a')
+                    anchor.download = datablob.name
+                    anchor.href = window.URL.createObjectURL(datablob)
+                    anchor.dataset.downloadurl = ['text/csv', anchor.download, anchor.href].join(':')
+                    anchor.click()
+                })
+            })
+}
+
+jsonbtn.onclick = function()
+{
+    console.log("clicked on json")
+    postalcode = postalcodeelt.value.trim()
+    console.log("code postal : " + postalcode)
+    km = kmelt.value.trim()
+    console.log("km : " + km)
+    if(postalcode != null && postalcode.length > 0)
+    {
+       if(km != null && km.length > 0)
+        {
+            console.log("fetch on city with perimeter")
+            fetchehpadjson(`/${postalcode}/${km}`)
+        }
+        else
+        {
+            console.log("fetch on county or city with no km")
+            fetchehpadjson(`/${postalcode}`)
+        }
+    }
+    else
+    {
+        console.log("no postal code")
+    }
+}
+
+csvbtn.onclick = function()
+{
+    console.log("clicked on csv")
+    postalcode = postalcodeelt.value.trim()
+    console.log("code postal : " + postalcode)
+    km = kmelt.value.trim()
+    console.log("km : " + km)
+    if(postalcode != null && postalcode.length > 0)
+    {
+       if(km != null && km.length > 0)
+        {
+            console.log("fetch on city with perimeter")
+            fetchehpadcsv(`/${postalcode}/${km}`)
+        }
+        else
+        {
+            console.log("fetch on county or city with no km")
+            fetchehpadcsv(`/${postalcode}`)
+        }
+    }
+    else
+    {
+        console.log("no postal code")
+    }
+}
+
+</script>
