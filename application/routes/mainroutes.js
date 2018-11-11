@@ -160,6 +160,7 @@ module.exports = function(app, express) {
     	res.render('index', data)
     })
 
+    //TO delete for content negociation
     mainRoutes.get('/csv', function(req, res){
 
       	postal = req.query.postal
@@ -193,6 +194,8 @@ module.exports = function(app, express) {
        	else res.render('index', data)
     })
 
+
+    //TO delete for content negociation
     mainRoutes.get('/json', function(req, res){
 
         postal = req.query.postal
@@ -217,6 +220,55 @@ module.exports = function(app, express) {
         }
        	else res.render('index', data) 
     })
+
+    mainRoutes.get('/:codepostal/:km', function(req, res){
+      postal = req.params.codepostal
+      km = req.params.km
+      reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/${km}`
+      jsonresult = {}
+      jsonresult.etablissements = []
+
+      data = {
+              postal : postal,
+              url : reqURL,
+              nbpages : 0 ,
+              statuscode: 0 ,
+              error: "no url specified" ,
+              json: jsonresult
+            }
+
+      if(postal != null)
+        {
+          request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
+            res.render('index', data)} 
+            )} )
+        }
+        else res.render('index', data)
+    })
+
+    mainRoutes.get('/:countycode', function(req, res){
+      postal = req.params.countycode
+      reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/0`
+      jsonresult = {}
+      jsonresult.etablissements = []
+
+      data = {
+              postal : postal,
+              url : reqURL,
+              nbpages : 0 ,
+              statuscode: 0 ,
+              error: "no url specified" ,
+              json: jsonresult
+            }
+
+      if(postal != null)
+        {
+          request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, function(data) { 
+            res.render('index', data)} 
+            )} )
+        }
+        else res.render('index', data)
+    })    
 
 	// apply the routes to our application
     app.use('/', mainRoutes)
