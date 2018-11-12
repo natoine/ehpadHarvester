@@ -10,5 +10,5 @@ In EHPAD Havrevester you have two routes :
 * GET /:postalcode/:km sends you all the EHPAD in a perimeter of km around the city identified by postalcode
 
 with content negotiation :
-** You can get JSon ('accept' : 'application/json')
-** You can get CSV ('accept' : 'text/csv')
+* You can get JSon ('accept' : 'application/json')
+* You can get CSV ('accept' : 'text/csv')
