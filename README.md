@@ -6,8 +6,8 @@ for examples how to get EHPAD in personnes-agees.gouv.fr :
 * https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/34830/1 get you all the ehpad from the page of result
 
 In EHPAD Havrevester you have two routes :
-* GET /:countycode sends you all the EHPAD of a county. 
-* GET /:postalcode/:km sends you all the EHPAD in a perimeter of km around the city identified by postalcode
+* GET /ehpad/:countycode sends you all the EHPAD of a county. 
+* GET /ehpad/:postalcode/:km sends you all the EHPAD in a perimeter of km around the city identified by postalcode
 
 with content negotiation :
 * You can get JSon ('accept' : 'application/json')

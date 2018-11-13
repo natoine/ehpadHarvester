@@ -83,12 +83,12 @@ jsonbtn.onclick = function()
        if(km != null && km.length > 0)
         {
             console.log("fetch on city with perimeter")
-            fetchehpadjson(`/${postalcode}/${km}`)
+            fetchehpadjson(`/ehpad/${postalcode}/${km}`)
         }
         else
         {
             console.log("fetch on county or city with no km")
-            fetchehpadjson(`/${postalcode}`)
+            fetchehpadjson(`/ehpad/${postalcode}`)
         }
     }
     else
@@ -109,12 +109,12 @@ csvbtn.onclick = function()
        if(km != null && km.length > 0)
         {
             console.log("fetch on city with perimeter")
-            fetchehpadcsv(`/${postalcode}/${km}`)
+            fetchehpadcsv(`/ehpad/${postalcode}/${km}`)
         }
         else
         {
             console.log("fetch on county or city with no km")
-            fetchehpadcsv(`/${postalcode}`)
+            fetchehpadcsv(`/ehpad/${postalcode}`)
         }
     }
     else
