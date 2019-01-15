@@ -196,26 +196,25 @@ module.exports = function(app, express) {
       if(km< 5) km = 5
       else 
       {
-        if(km > 5 && km < 10 ) km = 10
+        if(km > 5 && km <= 10 ) km = 10
         else 
         {
-          if(km > 10 && km < 20) km = 20
+          if(km > 10 && km <= 20) km = 20
           else
           {
-            if(km > 20 && km < 30) km = 30
+            if(km > 20 && km <= 30) km = 30
             else
             {
-              if(km > 30 && km < 50) km = 50
+              if(km > 30 && km <= 50) km = 50
               else
               {
-                if(km > 50 && km < 100) km = 100
+                if(km > 50 && km <= 100) km = 100
                 else km = 200
               }
             }
           }
         }
       }
-      console.log("km : " + km)        
       reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/${km}`
       jsonresult = {}
       jsonresult.etablissements = []
