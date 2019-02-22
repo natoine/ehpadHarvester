@@ -104,8 +104,8 @@ jsonbtn.onclick = function()
     {
         postalfiness = postalfinesselt.value.trim()
         departmentfiness = departementfinesselt.value.trim()
-        if(postalfiness != null) fetchehpadjson(`/finess/postalcode/${postalfiness}`)
-        else if(departmentfiness != null) fetchehpadjson(`/finess/departement/${departmentfiness}`)
+        if(postalfiness != null && postalfiness.length > 0) fetchehpadjson(`/finess/postalcode/${postalfiness}`)
+        else if(departmentfiness != null && departmentfiness.length > 0) fetchehpadjson(`/finess/departement/${departmentfiness}`)
     }
 }
 
@@ -133,8 +133,8 @@ csvbtn.onclick = function()
     {
         postalfiness = postalfinesselt.value.trim()
         departmentfiness = departementfinesselt.value.trim()
-        if(postalfiness != null) fetchehpadcsv(`/finess/postalcode/${postalfiness}`)
-        else if(departmentfiness != null) fetchehpadcsv(`/finess/departement/${departmentfiness}`)
+        if(postalfiness != null && postalfiness.length > 0) fetchehpadcsv(`/finess/postalcode/${postalfiness}`)
+        else if(departmentfiness != null && departmentfiness.length > 0) fetchehpadcsv(`/finess/departement/${departmentfiness}`)
     }
 }
 

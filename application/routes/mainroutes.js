@@ -91,7 +91,7 @@ module.exports = function(app, express) {
     				}
     				else
     				{
-    					console.log("recursiv call cptpages : " + error)
+    		//			console.log("recursiv call cptpages : " + error)
    						process(data)
     				}
     			})
@@ -164,7 +164,6 @@ module.exports = function(app, express) {
       }
       res.format({
               'application/json': function(){
-                console.log("asked some json")
                 request.get(options, 
                   function(error, response, html){ 
                     parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
@@ -172,7 +171,6 @@ module.exports = function(app, express) {
                 )} )
               },
               'text/csv': function(){
-                console.log("asked some csv")
                 request.get(options, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) {
                   fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
                   
@@ -187,7 +185,6 @@ module.exports = function(app, express) {
                 })} )
               },
               'text/html': function(){
-                console.log("asked some html")
                 request.get(options, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
                   res.render('index', data)} 
                 )} )
@@ -229,8 +226,6 @@ module.exports = function(app, express) {
       jsonresult = {}
       jsonresult.etablissements = []
 
-      console.log("reqURL :", reqURL)
-
       data = {
               postal : postal,
               url : reqURL,
@@ -253,8 +248,6 @@ module.exports = function(app, express) {
       jsonresult = {}
       jsonresult.etablissements = []
 
-      console.log("reqURL : " , reqURL )
-
       data = {
               postal : postal,
               url : reqURL,
@@ -272,7 +265,6 @@ module.exports = function(app, express) {
     })    
 
     mainRoutes.get('/', function(req, res) {
-      console.log("main")
       jsonresult = {}
       jsonresult.etablissements = []
         data = {
