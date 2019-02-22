@@ -10,6 +10,7 @@ app.set('view engine', 'ejs') // set up ejs for templating
 
 // routes ======================================================================
 require('./application/routes/mainroutes.js')(app, express)
+require('./application/routes/finessroutes.js')(app, express)
 
 // launch ======================================================================
 app.listen(port)
