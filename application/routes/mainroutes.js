@@ -15,7 +15,7 @@ module.exports = function(app, express) {
 
     function parseonepagecontentfrompersonnesageesgouvfr(html, etablissements)
     {
-    	$ = cheerio.load(html)
+     	$ = cheerio.load(html)
     	results = $('.cnsa_results-item-inside')
 
     	results.map(function(nodeiterator, el)
@@ -77,9 +77,12 @@ module.exports = function(app, express) {
     	else
     	{
     		//construct new url
-    		url = data.url + "?page=" + cptpages
+       var options = {
+          url: data.url + "?page=" + cptpages,
+          strictSSL: false
+        }
     		//console.log("recursiv call new url : " + url)
-    		request( url, function(error, response, html)
+    		request.get( options, function(error, response, html)
     			{
     				if(!error)
     				{
@@ -97,12 +100,26 @@ module.exports = function(app, express) {
 
     function parsehtmlfrompersonnesageesgouvfr(error, response, html, url, postal, km, process) 
     {
-    	statuscode = response && response.statusCode
+      statuscode = response && response.statusCode
     	jsonresult = {}
     	jsonresult.etablissements = []
   		etablissements = jsonresult.etablissements
 
-  		if(!error)
+      if(error) 
+      {
+        console.error(error)
+        data = {
+          postal: postal,
+          url : "",
+          km : km,
+          nbpages : 0 ,
+          statuscode: 0 , 
+          error: error ,
+          json: jsonresult
+        }
+        process(data)
+      }
+      else
   		{
   			$ = cheerio.load(html)
   			maxcptpages = 0
@@ -111,7 +128,7 @@ module.exports = function(app, express) {
   			}
   			catch(error)
   			{
-  				console.log("parsehtmlfrompersonnesageesgouvfr try maxcptpages error : " + error)
+  				console.error("parsehtmlfrompersonnesageesgouvfr try maxcptpages error : ", error)
   			}
 			
 			//parse the first page
@@ -137,33 +154,26 @@ module.exports = function(app, express) {
   				process(data)
   			}
 		  }
-  		else 
-  		{
-  			data = {
-  					postal: postal,
-            url : "",
-            km : km,
-  					nbpages : 0 ,
-  					statuscode: 0 , 
-  					error: error ,
-  					json: jsonresult
-  				}
-  			process(data)
-  		}
     }
 
     function contentnegotiation(res, reqURL, postal, km)
     {
+      var options = {
+        url: reqURL,
+        strictSSL: false
+      }
       res.format({
               'application/json': function(){
                 console.log("asked some json")
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
-                  res.send(data)} 
+                request.get(options, 
+                  function(error, response, html){ 
+                    parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
+                      res.send(data)} 
                 )} )
               },
               'text/csv': function(){
                 console.log("asked some csv")
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) {
+                request.get(options, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) {
                   fields = [ 'officialname', 'address', 'phone', 'typeehpad', 'bp', 'postalcode', 'city', 'coutsingle', 'coutdouble' ]
                   
                   json2csvParser = new Json2csvparser({ fields })
@@ -178,7 +188,7 @@ module.exports = function(app, express) {
               },
               'text/html': function(){
                 console.log("asked some html")
-                request(reqURL, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
+                request.get(options, function(error, response, html){ parsehtmlfrompersonnesageesgouvfr(error, response, html, reqURL, postal, km, function(data) { 
                   res.render('index', data)} 
                 )} )
               },
@@ -219,6 +229,8 @@ module.exports = function(app, express) {
       jsonresult = {}
       jsonresult.etablissements = []
 
+      console.log("reqURL :", reqURL)
+
       data = {
               postal : postal,
               url : reqURL,
@@ -240,6 +252,8 @@ module.exports = function(app, express) {
       reqURL = `https://www.pour-les-personnes-agees.gouv.fr/annuaire-ehpad-en-hebergement-permanent/${postal}/0`
       jsonresult = {}
       jsonresult.etablissements = []
+
+      console.log("reqURL : " , reqURL )
 
       data = {
               postal : postal,
