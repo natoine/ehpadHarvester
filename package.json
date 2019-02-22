@@ -19,6 +19,7 @@
   "homepage": "https://github.com/natoine/ehpadHarvester#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "csv-parse": "^4.3.3",
     "ejs": "^2.5.7",
     "express": "^4.15.4",
     "json2csv": "^4.2.1",
