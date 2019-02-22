@@ -25,14 +25,51 @@ module.exports = function(app, express) {
         })
 
         var output = []
+        var ids = []
 
         rl.on('line', function(line) {
-            parse(line, { delimiter: ';' }, function(err, parsedline){
+            parse(line, { delimiter: ';' }, function(err, [parsedline]){
                 if(err) console.error("problem parsing line ", line, err)
                 else 
                 {
-                    if(parsedline[0][20] && categories.includes(parsedline[0][20].trim())) output.push(parsedline[0])
-                    else if(parsedline[0][18] && subcategories.includes(parsedline[0][18].trim())) output.push(parsedline[0])
+                    if((parsedline[20] && categories.includes(parsedline[20].trim())) || 
+                    (parsedline[18] && subcategories.includes(parsedline[18].trim())))
+                    {
+                        var adresse = parsedline[7] + " " + parsedline[8] + " " + parsedline[9] + " " + parsedline[10] + " " + parsedline[11]
+                        var [postCode, ...rest] = parsedline[15].split(' ');
+                        var etablissement = {
+                            id : parsedline[1],
+                            raisonsociale : parsedline[3],
+                            raisonsoscialeetendue : parsedline[4],
+                            adresse :  adresse.trim(),
+                            codecommune : parsedline[12],
+                            codedepartement : parsedline[13],
+                            departement : parsedline[14],
+                            codepostal : postCode,
+                            ville : rest.join(' '),
+                            phone : parsedline[16],
+                            categorycode : parsedline[18],
+                            category : parsedline[19],
+                            agregatcategorycode : parsedline[20],
+                            agregatcategory : parsedline[21],
+                            siret : parsedline[22],
+                            codemft : parsedline[24],
+                            mft : parsedline[25],
+                            codesph : parsedline[26],
+                            sph : parsedline[27] 
+                        }
+                        output.push(etablissement)
+                        ids.push(parsedline[1])
+                    }
+                    else if(parsedline[0] === "geolocalisation")
+                    {
+                        var id = parsedline[1]
+                        if(ids.includes(id))
+                        {
+                            output[ids.indexOf(id)].x = parsedline[2]
+                            output[ids.indexOf(id)].y = parsedline[3]
+                        }
+                    }
                 }
             })
         })
