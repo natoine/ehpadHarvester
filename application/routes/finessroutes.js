@@ -5,6 +5,9 @@ const path = require('path')
 const readline = require('readline')
 const parse = require('csv-parse')
 
+const Json2csvparser = require('json2csv').Parser
+var json2csvParser = new Json2csvparser()
+
 const categories = [ '1101', '1102', '1106', '1107', '1109', '1110', '1201', '4101', '4103', '4105', '4106',
                         '4107', '4301', '4304', '4305', '4401', '4402', '4404' ]
 
@@ -43,10 +46,10 @@ module.exports = function(app, express) {
                             raisonsoscialeetendue : parsedline[4],
                             adresse :  adresse.trim(),
                             codecommune : parsedline[12],
+                            ville : rest.join(' '),
                             codedepartement : parsedline[13],
                             departement : parsedline[14],
                             codepostal : postCode,
-                            ville : rest.join(' '),
                             phone : parsedline[16],
                             categorycode : parsedline[18],
                             category : parsedline[19],
@@ -75,7 +78,13 @@ module.exports = function(app, express) {
         })
 
         rl.on('close', function() {
-            console.log("end", output)
+            
+            var csv = json2csvParser.parse(output, function(err){ 
+                console.error(err)
+            })
+            res.setHeader('Content-disposition', 'attachment; filename=etablissements.csv')
+            res.set('Content-Type', 'text/csv')
+            res.status(200).send(csv)
         })
 
     })
