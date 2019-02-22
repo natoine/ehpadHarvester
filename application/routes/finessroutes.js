@@ -19,7 +19,8 @@ module.exports = function(app, express) {
     // get an instance of the router for main routes
     const finessRoutes = express.Router()
 
-    finessRoutes.get("/interestingetabs", function(req, res) {
+    function extractinterestingetablissements( inputcodeDepartement, inputcodePostal , res, process )
+    {
         var instream = fs.createReadStream(path.join("ressources", "listeFinessJanvier2019.csv"))
 
         var rl = readline.createInterface({
@@ -30,8 +31,12 @@ module.exports = function(app, express) {
         var output = []
         var ids = []
 
+        if(inputcodeDepartement && inputcodeDepartement!==0) console.log("department :", inputcodeDepartement)
+        if(inputcodePostal && inputcodePostal!==0) console.log("postal :", inputcodePostal)
+
         rl.on('line', function(line) {
             parse(line, { delimiter: ';' }, function(err, [parsedline]){
+                console.log("still working")
                 if(err) console.error("problem parsing line ", line, err)
                 else 
                 {
@@ -78,15 +83,47 @@ module.exports = function(app, express) {
         })
 
         rl.on('close', function() {
-            
-            var csv = json2csvParser.parse(output, function(err){ 
-                console.error(err)
-            })
-            res.setHeader('Content-disposition', 'attachment; filename=etablissements.csv')
-            res.set('Content-Type', 'text/csv')
-            res.status(200).send(csv)
+            process(output, res)
         })
 
+    }
+
+    function tocsv( listeetablissements, res )
+    {
+        console.log("tocsv")
+        var csv = json2csvParser.parse(listeetablissements, function(err){ 
+            console.error(err)
+        })
+        res.setHeader('Content-disposition', 'attachment; filename=etablissements.csv')
+        res.set('Content-Type', 'text/csv')
+        res.status(200).send(csv)
+    }
+
+    function tojson( listeetablissements, res )
+    {
+        console.log("tojson")
+        res.send(listeetablissements)
+    }
+
+    finessRoutes.get("/postalcode/:codepostal", function(req, res) {
+        var postal = req.params.codepostal
+        res.format({'application/json': function(){
+            console.log("asked some json")
+            extractinterestingetablissements( 0, postal, res, tojson)
+          },
+          'text/csv': function(){
+            console.log("asked some csv")
+            extractinterestingetablissements( 0, postal, res, tocsv)
+          },'default': function(){
+            res.status(406).send('Not Acceptable')
+          }
+        })
+        
+    })
+
+    finessRoutes.get("/departement/:codedepartement", function(req, res) {
+        var departement = req.params.codedepartement
+        extractinterestingetablissements( departement, res, tocsv)
     })
 
     // apply the routes to our application

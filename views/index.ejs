@@ -8,14 +8,21 @@
    
 </head>
 <body>
-
+        <h1>Base Finess</h1>
+        Code Postal :
+        <input type="text" id="inputpostalfiness" name="postalfiness"></input></br>
+        Code département :
+        <input type="text" id="inputdepartementfiness" name="departementfiness"></input></br>
+        <h1>CNSA</h1>
     	Code Postal ou Département :
     	<input type="text" id="inputpostal" name="postal" value="<%=data.postal%>"></input></br>
     	Périmètre :
         <input type="text" id="inputkm" name="km" value="<%=data.km%>"></input></br>
+        <h2>format :</h2>
         <button type="button" id="jsonbtn">JSON</button>
         <button type="button" id="csvbtn">CSV</button>
         
+        <h3>debug</h3>
 
     <div id="response">
     	<%= data.error%> </br>
@@ -35,6 +42,8 @@ jsonbtn = document.getElementById("jsonbtn")
 csvbtn = document.getElementById("csvbtn")
 postalcodeelt = document.getElementById("inputpostal")
 kmelt = document.getElementById("inputkm")
+postalfinesselt = document.getElementById("inputpostalfiness")
+departementfinesselt = document.getElementById("inputdepartementfiness")
 
 function fetchehpadjson(route)
 {
@@ -93,7 +102,10 @@ jsonbtn.onclick = function()
     }
     else
     {
-        console.log("no postal code")
+        postalfiness = postalfinesselt.value.trim()
+        departmentfiness = departementfinesselt.value.trim()
+        if(postalfiness != null) fetchehpadjson(`/finess/postalcode/${postalfiness}`)
+        else if(departmentfiness != null) fetchehpadjson(`/finess/departement/${departmentfiness}`)
     }
 }
 
@@ -119,7 +131,10 @@ csvbtn.onclick = function()
     }
     else
     {
-        console.log("no postal code")
+        postalfiness = postalfinesselt.value.trim()
+        departmentfiness = departementfinesselt.value.trim()
+        if(postalfiness != null) fetchehpadcsv(`/finess/postalcode/${postalfiness}`)
+        else if(departmentfiness != null) fetchehpadcsv(`/finess/departement/${departmentfiness}`)
     }
 }
 
